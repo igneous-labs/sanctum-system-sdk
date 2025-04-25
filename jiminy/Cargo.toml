@@ -1,0 +1,6 @@
+[package]
+name = "sanctum-system-jiminy"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
