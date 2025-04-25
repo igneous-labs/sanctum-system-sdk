@@ -36,11 +36,12 @@ impl AssignIxData {
     pub const fn new(owner: &[u8; 32]) -> Self {
         const A: usize = ASSIGN_IX_DATA_LEN;
 
-        let mut ix_data = [0u8; A];
-        ix_data = caba::<A, 0, 4>(ix_data, &ASSIGN_IX_DISCM);
-        ix_data = caba::<A, 4, 32>(ix_data, owner);
+        let mut d = [0u8; A];
 
-        Self(ix_data)
+        d = caba::<A, 0, 4>(d, &ASSIGN_IX_DISCM);
+        d = caba::<A, 4, 32>(d, owner);
+
+        Self(d)
     }
 
     #[inline]
