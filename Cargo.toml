@@ -13,7 +13,10 @@ version = "0.1.0"
 [workspace.dependencies]
 # In general, keep default-features = false in workspace
 # and enable individual features in indiv crates
+generic-array-struct = { version = "=0.3.0-bc", default-features = false }
 
+# jiminy crates
+jiminy-cpi = { git = "https://github.com/igneous-labs/jiminy.git", branch = "master" }
 
 # solana crates (for dev)
 
