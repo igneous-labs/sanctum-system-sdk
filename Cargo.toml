@@ -3,7 +3,8 @@ resolver = "2"
 
 members = [
     "core",
-    "jiminy", 
+    "jiminy",
+    "tests/solana-comp", 
 ]
 
 [workspace.package]
@@ -18,8 +19,13 @@ generic-array-struct = { version = "=0.3.0-bc", default-features = false }
 # jiminy crates
 jiminy-cpi = { git = "https://github.com/igneous-labs/jiminy.git", branch = "master" }
 
-# solana crates (for dev)
+# dev deps
+proptest = { version = "^1" }
 
+# solana crates (for dev)
+solana-instruction = "^2"
+solana-pubkey = "^2"
+solana-system-interface = "^1"
 
 # workspace members
 sanctum-system-core = { path = "core" }

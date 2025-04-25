@@ -1,0 +1,11 @@
+[package]
+name = "solana-comp"
+edition.workspace = true
+version.workspace = true
+
+[dev-dependencies]
+proptest = { workspace = true }
+sanctum-system-core = { workspace = true }
+solana-instruction = { workspace = true }
+solana-pubkey = { workspace = true }
+solana-system-interface = { workspace = true, features = ["bincode"] }
