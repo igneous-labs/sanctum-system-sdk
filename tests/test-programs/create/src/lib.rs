@@ -13,7 +13,7 @@ use sanctum_system_jiminy::{
     sanctum_system_core::instructions::create_account::{CreateAccountIxArgs, CreateAccountIxData},
 };
 
-const MAX_ACCOUNTS: usize = 2;
+const MAX_ACCOUNTS: usize = 3;
 
 type Accounts<'a> = jiminy_entrypoint::account::Accounts<'a, MAX_ACCOUNTS>;
 type Cpi = jiminy_cpi::Cpi<3>;
