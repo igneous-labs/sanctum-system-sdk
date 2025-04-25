@@ -1,0 +1,10 @@
+[package]
+name = "sanctum-system-test-utils"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+mollusk-svm = { workspace = true }
+solana-account = { workspace = true }
+solana-pubkey = { workspace = true }
+solana-rent = { workspace = true }

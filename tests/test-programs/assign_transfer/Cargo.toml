@@ -1,0 +1,20 @@
+[package]
+name = "assign-transfer-test"
+edition.workspace = true
+version.workspace = true
+
+[features]
+default = []
+test-sbf = []
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+jiminy-cpi = { workspace = true }
+jiminy-entrypoint = { workspace = true }
+jiminy-sysvar-rent = { workspace = true }
+sanctum-system-jiminy = { workspace = true }
+
+[dev-dependencies]
+sanctum-system-test-utils = { workspace = true }
