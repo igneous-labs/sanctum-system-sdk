@@ -2,6 +2,9 @@
 //!
 //! Create is more efficient in both binary size and CUs than Assign + transfer + realloc.
 //! CPI is extremely compute intensive.
+//!
+//! Each call to invoke() costs 1K CUs min after all:
+//! https://github.com/anza-xyz/agave/blob/fd207f94823c0193bc87fdbe200378c48c19ee04/program-runtime/src/execution_budget.rs#L167
 
 #![cfg(feature = "test-sbf")]
 
