@@ -2,10 +2,11 @@ use proptest::prelude::*;
 use sanctum_system_core::instructions::assign::{
     AssignIxAccs, AssignIxData, ASSIGN_IX_IS_SIGNER, ASSIGN_IX_IS_WRITABLE,
 };
+use sanctum_system_test_utils::to_sol_ix;
 use solana_pubkey::Pubkey;
 use solana_system_interface::instruction::assign;
 
-use crate::common::{to_sol_ix, ID_PK};
+use crate::common::ID_PK;
 
 type AssignIxKeys = AssignIxAccs<Pubkey>;
 

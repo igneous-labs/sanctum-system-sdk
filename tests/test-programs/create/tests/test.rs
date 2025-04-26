@@ -1,2 +1,127 @@
 //! .so file size 6544
-//! TODO
+//!
+//! Create is more efficient in both binary size and CUs than Assign + transfer + realloc.
+//! CPI is extremely compute intensive.
+
+#![cfg(feature = "test-sbf")]
+
+use jiminy_cpi::account::MAX_PERMITTED_DATA_INCREASE;
+use mollusk_svm::{program::keyed_account_for_system_program, result::InstructionResult, Mollusk};
+use proptest::prelude::*;
+use sanctum_system_jiminy::sanctum_system_core::ID;
+use sanctum_system_test_utils::{
+    are_all_accounts_rent_exempt, is_tx_balanced, silence_mollusk_prog_logs, two_diff_pks,
+};
+use solana_account::Account;
+use solana_instruction::{AccountMeta, Instruction};
+use solana_pubkey::Pubkey;
+
+const PROG_NAME: &str = "create_test";
+const PROG_ID: Pubkey = solana_pubkey::pubkey!("2uX9abtfRANMnpTMbXQBAxn4vDMp6ok4c1jyBw8vQPoF");
+
+const TO_ACC_IDX: usize = 2;
+
+// CUs: 1440
+#[test]
+fn create_cus() {
+    const FROM: Pubkey = solana_pubkey::pubkey!("FmqrDYpnekE92iPotx8PGQed8fQ9DbeMuE7ASeA9Q72x");
+    const TO: Pubkey = solana_pubkey::pubkey!("2mQbNpB6tbF6cguY7M6NjGozGLTUwJVeUBceWqEH3gkt");
+    const SIZE: usize = 888;
+
+    let svm = Mollusk::new(&PROG_ID, PROG_NAME);
+    let accounts = ix_accounts(FROM, TO);
+    let instr = ix(FROM, TO, SIZE);
+
+    let InstructionResult {
+        compute_units_consumed,
+        raw_result,
+        resulting_accounts,
+        ..
+    } = svm.process_instruction(&instr, &accounts);
+
+    raw_result.unwrap();
+
+    eprintln!("{compute_units_consumed} CUs");
+
+    are_all_accounts_rent_exempt(&resulting_accounts).unwrap();
+    assert!(is_tx_balanced(&accounts, &resulting_accounts));
+
+    let to = &resulting_accounts[TO_ACC_IDX].1;
+    assert_eq!(to.owner, PROG_ID);
+    assert_eq!(to.data.len(), SIZE);
+}
+
+proptest! {
+    #[test]
+    fn create_all(
+        pks in two_diff_pks(),
+        size in 0..=MAX_PERMITTED_DATA_INCREASE,
+    ) {
+        let [from, to] = pks.map(Pubkey::new_from_array);
+
+        let svm = Mollusk::new(&PROG_ID, PROG_NAME);
+        silence_mollusk_prog_logs();
+        let accounts = ix_accounts(from, to);
+        let instr = ix(from, to, size);
+
+        let InstructionResult {
+            raw_result,
+            resulting_accounts,
+            ..
+        } = svm.process_instruction(&instr, &accounts);
+
+        raw_result.unwrap();
+
+        prop_assert_eq!(are_all_accounts_rent_exempt(&resulting_accounts), Ok(()));
+        prop_assert!(is_tx_balanced(&accounts, &resulting_accounts));
+
+        let to = &resulting_accounts[TO_ACC_IDX].1;
+        prop_assert_eq!(to.owner, PROG_ID);
+        prop_assert_eq!(to.data.len(), size);
+    }
+}
+
+fn from_to_accs(from: Pubkey, to: Pubkey) -> [(Pubkey, Account); 2] {
+    [
+        (
+            from,
+            Account {
+                // have enough to pay for all possible rent-exemptions
+                // while not triggering overflows
+                lamports: u64::MAX / 2,
+                ..Default::default()
+            },
+        ),
+        (to, Account::default()), // empty account
+    ]
+}
+
+fn ix_accounts(from: Pubkey, to: Pubkey) -> [(Pubkey, Account); 3] {
+    let [from, to] = from_to_accs(from, to);
+    [keyed_account_for_system_program(), from, to]
+}
+
+fn ix(from: Pubkey, to: Pubkey, size: usize) -> Instruction {
+    Instruction {
+        program_id: PROG_ID,
+        accounts: [
+            AccountMeta {
+                pubkey: Pubkey::new_from_array(ID),
+                is_signer: false,
+                is_writable: false,
+            },
+            AccountMeta {
+                pubkey: from,
+                is_signer: true,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: to,
+                is_signer: true,
+                is_writable: true,
+            },
+        ]
+        .into(),
+        data: (size as u64).to_le_bytes().into(),
+    }
+}

@@ -2,10 +2,11 @@ use proptest::prelude::*;
 use sanctum_system_core::instructions::transfer::{
     TransferIxAccs, TransferIxData, TRANSFER_IX_IS_SIGNER, TRANSFER_IX_IS_WRITABLE,
 };
+use sanctum_system_test_utils::to_sol_ix;
 use solana_pubkey::Pubkey;
 use solana_system_interface::instruction::transfer;
 
-use crate::common::{to_sol_ix, ID_PK};
+use crate::common::ID_PK;
 
 type TransferIxKeys = TransferIxAccs<Pubkey>;
 

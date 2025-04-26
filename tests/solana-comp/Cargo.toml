@@ -6,6 +6,7 @@ version.workspace = true
 [dev-dependencies]
 proptest = { workspace = true }
 sanctum-system-core = { workspace = true }
+sanctum-system-test-utils = { workspace = true }
 solana-instruction = { workspace = true }
 solana-pubkey = { workspace = true }
 solana-system-interface = { workspace = true, features = ["bincode"] }

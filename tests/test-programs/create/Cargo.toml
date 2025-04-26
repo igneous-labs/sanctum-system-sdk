@@ -17,4 +17,9 @@ jiminy-sysvar-rent = { workspace = true }
 sanctum-system-jiminy = { workspace = true }
 
 [dev-dependencies]
+mollusk-svm = { workspace = true }
+proptest = { workspace = true }
+solana-account = { workspace = true }
+solana-instruction = { workspace = true }
+solana-pubkey = { workspace = true }
 sanctum-system-test-utils = { workspace = true }

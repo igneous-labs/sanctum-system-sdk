@@ -234,8 +234,13 @@ dependencies = [
  "jiminy-cpi",
  "jiminy-entrypoint",
  "jiminy-sysvar-rent",
+ "mollusk-svm",
+ "proptest",
  "sanctum-system-jiminy",
  "sanctum-system-test-utils",
+ "solana-account",
+ "solana-instruction",
+ "solana-pubkey",
 ]
 
 [[package]]
@@ -532,8 +537,13 @@ dependencies = [
  "jiminy-cpi",
  "jiminy-entrypoint",
  "jiminy-sysvar-rent",
+ "mollusk-svm",
+ "proptest",
  "sanctum-system-jiminy",
  "sanctum-system-test-utils",
+ "solana-account",
+ "solana-instruction",
+ "solana-pubkey",
 ]
 
 [[package]]
@@ -2129,7 +2139,10 @@ name = "sanctum-system-test-utils"
 version = "0.1.0"
 dependencies = [
  "mollusk-svm",
+ "proptest",
  "solana-account",
+ "solana-instruction",
+ "solana-logger",
  "solana-pubkey",
  "solana-rent",
 ]
@@ -2469,6 +2482,7 @@ version = "0.1.0"
 dependencies = [
  "proptest",
  "sanctum-system-core",
+ "sanctum-system-test-utils",
  "solana-instruction",
  "solana-pubkey",
  "solana-system-interface",
