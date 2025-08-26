@@ -1,5 +1,3 @@
-//! .so file size 7176
-//!
 //! Create is more efficient in both binary size and CUs than Assign + transfer + realloc.
 //! CPI is extremely compute intensive.
 //!
@@ -17,7 +15,7 @@ use mollusk_svm::{
 use proptest::prelude::*;
 use sanctum_system_jiminy::sanctum_system_core::ID;
 use sanctum_system_test_utils::{
-    is_tx_balanced, save_cus_to_file, silence_mollusk_prog_logs, two_diff_pks,
+    is_tx_balanced, save_binsize_to_file, save_cus_to_file, silence_mollusk_prog_logs, two_diff_pks,
 };
 use solana_account::Account;
 use solana_instruction::{AccountMeta, Instruction};
@@ -31,6 +29,11 @@ thread_local! {
 }
 
 const TO_ACC_IDX: usize = 2;
+
+#[test]
+fn save_binsize() {
+    save_binsize_to_file(PROG_NAME);
+}
 
 #[test]
 fn assign_transfer_cus() {
