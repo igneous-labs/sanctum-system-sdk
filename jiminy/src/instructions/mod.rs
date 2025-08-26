@@ -13,11 +13,8 @@ pub mod transfer;
 
 mod internal_utils;
 
-pub type SystemInstr<'account, 'data, const ACCOUNTS: usize> = jiminy_cpi::Instr<
-    'account,
-    'data,
-    Zip<
-        array::IntoIter<AccountHandle<'account>, ACCOUNTS>,
-        array::IntoIter<AccountPerms, ACCOUNTS>,
-    >,
+/// `impls IntoIterator<Item = (AccountHandle, AccountPerms)>`
+pub type SystemAccountHandlePerms<'account, const ACCOUNTS: usize> = Zip<
+    array::IntoIter<AccountHandle<'account>, ACCOUNTS>,
+    array::IntoIter<AccountPerms, ACCOUNTS>,
 >;

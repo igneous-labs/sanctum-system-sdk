@@ -9,8 +9,10 @@
 use jiminy_entrypoint::program_error::{BuiltInProgramError, ProgramError};
 use jiminy_sysvar_rent::{sysvar::SimpleSysvar, Rent};
 use sanctum_system_jiminy::{
-    instructions::create_account::{create_account_ix, CreateAccountIxAccounts},
-    sanctum_system_core::instructions::create_account::{CreateAccountIxArgs, CreateAccountIxData},
+    instructions::create_account::create_account_ix_account_handle_perms,
+    sanctum_system_core::instructions::create_account::{
+        CreateAccountIxArgs, CreateAccountIxData, NewCreateAccountIxAccsBuilder,
+    },
 };
 
 const MAX_ACCOUNTS: usize = 3;
@@ -38,19 +40,22 @@ fn process_ix(
     ) as usize;
 
     let lamports = Rent::get()?.min_balance(space);
+    let sys_prog_key = *accounts.get(sys_prog).key();
 
     Cpi::new().invoke_signed(
         accounts,
-        create_account_ix(
-            sys_prog,
-            CreateAccountIxAccounts::memset(sys_prog)
+        &sys_prog_key,
+        CreateAccountIxData::new(&CreateAccountIxArgs {
+            lamports,
+            space,
+            owner: prog_id,
+        })
+        .as_buf(),
+        create_account_ix_account_handle_perms(
+            NewCreateAccountIxAccsBuilder::start()
                 .with_funding(from)
-                .with_new(to),
-            &CreateAccountIxData::new(&CreateAccountIxArgs {
-                lamports,
-                space,
-                owner: prog_id,
-            }),
+                .with_new(to)
+                .build(),
         ),
         &[],
     )

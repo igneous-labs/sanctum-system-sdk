@@ -6,7 +6,7 @@ use super::internal_utils::impl_memset;
 
 // Accounts
 
-#[generic_array_struct(pub)]
+#[generic_array_struct(builder pub)]
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub struct TransferIxAccs<T> {

@@ -11,10 +11,12 @@ use jiminy_entrypoint::program_error::{BuiltInProgramError, ProgramError};
 use jiminy_sysvar_rent::{sysvar::SimpleSysvar, Rent};
 use sanctum_system_jiminy::{
     instructions::{
-        assign::{assign_ix, AssignIxAccounts},
-        transfer::{transfer_ix, TransferIxAccounts},
+        assign::assign_ix_account_handle_perms, transfer::transfer_ix_account_handle_perms,
     },
-    sanctum_system_core::instructions::{assign::AssignIxData, transfer::TransferIxData},
+    sanctum_system_core::instructions::{
+        assign::{AssignIxData, NewAssignIxAccsBuilder},
+        transfer::{NewTransferIxAccsBuilder, TransferIxData},
+    },
 };
 
 const MAX_ACCOUNTS: usize = 3;
@@ -44,24 +46,24 @@ fn process_ix(
     let lamports = Rent::get()?.min_balance(space);
 
     let mut cpi = Cpi::new();
+    let sys_prog_key = *accounts.get(sys_prog).key();
 
     cpi.invoke_signed(
         accounts,
-        assign_ix(
-            sys_prog,
-            AssignIxAccounts::memset(sys_prog).with_assign(to),
-            &AssignIxData::new(prog_id),
-        ),
+        &sys_prog_key,
+        AssignIxData::new(prog_id).as_buf(),
+        assign_ix_account_handle_perms(NewAssignIxAccsBuilder::start().with_assign(to).build()),
         &[],
     )?;
     cpi.invoke_signed(
         accounts,
-        transfer_ix(
-            sys_prog,
-            TransferIxAccounts::memset(sys_prog)
+        &sys_prog_key,
+        TransferIxData::new(lamports).as_buf(),
+        transfer_ix_account_handle_perms(
+            NewTransferIxAccsBuilder::start()
                 .with_from(from)
-                .with_to(to),
-            &TransferIxData::new(lamports),
+                .with_to(to)
+                .build(),
         ),
         &[],
     )?;
