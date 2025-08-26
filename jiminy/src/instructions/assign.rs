@@ -1,9 +1,9 @@
 use jiminy_cpi::{account::AccountHandle, AccountPerms};
 use sanctum_system_core::instructions::assign::{
-    AssignIxAccs, AssignIxData, ASSIGN_IX_ACCS_LEN, ASSIGN_IX_IS_SIGNER, ASSIGN_IX_IS_WRITABLE,
+    AssignIxAccs, ASSIGN_IX_ACCS_LEN, ASSIGN_IX_IS_SIGNER, ASSIGN_IX_IS_WRITABLE,
 };
 
-use super::{internal_utils::signer_writable_to_perms, SystemInstr};
+use super::{internal_utils::signer_writable_to_perms, SystemAccountHandlePerms};
 
 pub type AssignIxAccounts<'a> = AssignIxAccs<AccountHandle<'a>>;
 pub type AssignIxAccountPerms = AssignIxAccs<AccountPerms>;
@@ -13,15 +13,8 @@ pub const ASSIGN_IX_ACCOUNT_PERMS: AssignIxAccountPerms = AssignIxAccs(signer_wr
     ASSIGN_IX_IS_WRITABLE.0,
 ));
 
-#[inline]
-pub fn assign_ix<'account, 'data>(
-    system_prog: AccountHandle<'account>,
-    accounts: AssignIxAccounts<'account>,
-    ix_data: &'data AssignIxData,
-) -> SystemInstr<'account, 'data, ASSIGN_IX_ACCS_LEN> {
-    SystemInstr {
-        prog: system_prog,
-        data: ix_data.as_buf(),
-        accounts: accounts.0.into_iter().zip(ASSIGN_IX_ACCOUNT_PERMS.0),
-    }
+pub fn assign_ix_account_handle_perms(
+    a: AssignIxAccounts,
+) -> SystemAccountHandlePerms<'_, ASSIGN_IX_ACCS_LEN> {
+    a.0.into_iter().zip(ASSIGN_IX_ACCOUNT_PERMS.0)
 }

@@ -1,4 +1,4 @@
-//! .so file size 7168
+//! .so file size 7928
 //!
 //! Create is more efficient in both binary size and CUs than Assign + transfer + realloc.
 //! CPI is extremely compute intensive.
@@ -9,11 +9,15 @@
 #![cfg(feature = "test-sbf")]
 
 use jiminy_cpi::account::MAX_PERMITTED_DATA_INCREASE;
-use mollusk_svm::{program::keyed_account_for_system_program, result::InstructionResult, Mollusk};
+use mollusk_svm::{
+    program::keyed_account_for_system_program,
+    result::{Check, InstructionResult},
+    Mollusk,
+};
 use proptest::prelude::*;
 use sanctum_system_jiminy::sanctum_system_core::ID;
 use sanctum_system_test_utils::{
-    are_all_accounts_rent_exempt, is_tx_balanced, silence_mollusk_prog_logs, two_diff_pks,
+    is_tx_balanced, save_cus_to_file, silence_mollusk_prog_logs, two_diff_pks,
 };
 use solana_account::Account;
 use solana_instruction::{AccountMeta, Instruction};
@@ -22,36 +26,39 @@ use solana_pubkey::Pubkey;
 const PROG_NAME: &str = "assign_transfer_test";
 const PROG_ID: Pubkey = solana_pubkey::pubkey!("2uX9abtfRANMnpTMbXQBAxn4vDMp6ok4c1jyBw8vQPoF");
 
+thread_local! {
+    static SVM: Mollusk = Mollusk::new(&PROG_ID, PROG_NAME);
+}
+
 const TO_ACC_IDX: usize = 2;
 
-// CUs: 2665
 #[test]
 fn assign_transfer_cus() {
     const FROM: Pubkey = solana_pubkey::pubkey!("FmqrDYpnekE92iPotx8PGQed8fQ9DbeMuE7ASeA9Q72x");
     const TO: Pubkey = solana_pubkey::pubkey!("2mQbNpB6tbF6cguY7M6NjGozGLTUwJVeUBceWqEH3gkt");
     const SIZE: usize = 888;
 
-    let svm = Mollusk::new(&PROG_ID, PROG_NAME);
     let accounts = ix_accounts(FROM, TO);
     let instr = ix(FROM, TO, SIZE);
 
-    let InstructionResult {
-        compute_units_consumed,
-        raw_result,
-        resulting_accounts,
-        ..
-    } = svm.process_instruction(&instr, &accounts);
+    SVM.with(|svm| {
+        let InstructionResult {
+            compute_units_consumed,
+            raw_result,
+            resulting_accounts,
+            ..
+        } = svm.process_and_validate_instruction(&instr, &accounts, &[Check::all_rent_exempt()]);
 
-    raw_result.unwrap();
+        raw_result.unwrap();
 
-    eprintln!("{compute_units_consumed} CUs");
+        assert!(is_tx_balanced(&accounts, &resulting_accounts));
 
-    are_all_accounts_rent_exempt(&resulting_accounts).unwrap();
-    assert!(is_tx_balanced(&accounts, &resulting_accounts));
+        let to = &resulting_accounts[TO_ACC_IDX].1;
+        assert_eq!(to.owner, PROG_ID);
+        assert_eq!(to.data.len(), SIZE);
 
-    let to = &resulting_accounts[TO_ACC_IDX].1;
-    assert_eq!(to.owner, PROG_ID);
-    assert_eq!(to.data.len(), SIZE);
+        save_cus_to_file("basic", compute_units_consumed);
+    });
 }
 
 proptest! {
@@ -60,27 +67,34 @@ proptest! {
         pks in two_diff_pks(),
         size in 0..=MAX_PERMITTED_DATA_INCREASE,
     ) {
+        silence_mollusk_prog_logs();
+
         let [from, to] = pks.map(Pubkey::new_from_array);
 
-        let svm = Mollusk::new(&PROG_ID, PROG_NAME);
-        silence_mollusk_prog_logs();
         let accounts = ix_accounts(from, to);
         let instr = ix(from, to, size);
 
-        let InstructionResult {
-            raw_result,
-            resulting_accounts,
-            ..
-        } = svm.process_instruction(&instr, &accounts);
+        SVM.with(|svm| {
+            let InstructionResult {
+                raw_result,
+                resulting_accounts,
+                ..
+            } = svm.process_and_validate_instruction(
+                &instr,
+                &accounts,
+                &[Check::all_rent_exempt()],
+            );
 
-        raw_result.unwrap();
+            raw_result.unwrap();
 
-        prop_assert_eq!(are_all_accounts_rent_exempt(&resulting_accounts), Ok(()));
-        prop_assert!(is_tx_balanced(&accounts, &resulting_accounts));
+            prop_assert!(is_tx_balanced(&accounts, &resulting_accounts));
 
-        let to = &resulting_accounts[TO_ACC_IDX].1;
-        prop_assert_eq!(to.owner, PROG_ID);
-        prop_assert_eq!(to.data.len(), size);
+            let to = &resulting_accounts[TO_ACC_IDX].1;
+            prop_assert_eq!(to.owner, PROG_ID);
+            prop_assert_eq!(to.data.len(), size);
+
+            Ok(())
+        }).unwrap();
     }
 }
 

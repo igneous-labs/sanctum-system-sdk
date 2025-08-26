@@ -4,7 +4,7 @@ use super::internal_utils::{caba, impl_memset};
 
 // Accounts
 
-#[generic_array_struct(pub)]
+#[generic_array_struct(builder pub)]
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub struct AssignIxAccs<T> {
