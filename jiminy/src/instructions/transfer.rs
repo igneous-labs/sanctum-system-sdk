@@ -12,6 +12,7 @@ pub const TRANSFER_IX_ACCOUNT_PERMS: TransferIxAccountPerms = TransferIxAccs(
     signer_writable_to_perms(TRANSFER_IX_IS_SIGNER.0, TRANSFER_IX_IS_WRITABLE.0),
 );
 
+#[inline]
 pub fn transfer_ix_account_handle_perms(
     a: TransferIxAccounts,
 ) -> SystemAccountHandlePerms<'_, TRANSFER_IX_ACCS_LEN> {

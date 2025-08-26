@@ -15,6 +15,7 @@ pub const CREATE_ACCOUNT_IX_ACCOUNT_PERMS: CreateAccountIxAccountPerms =
         CREATE_ACCOUNT_IX_IS_WRITABLE.0,
     ));
 
+#[inline]
 pub fn create_account_ix_account_handle_perms(
     a: CreateAccountIxAccounts,
 ) -> SystemAccountHandlePerms<'_, CREATE_ACCOUNT_IX_ACCS_LEN> {

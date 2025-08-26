@@ -1,4 +1,4 @@
-//! .so file size 7928
+//! .so file size 7176
 //!
 //! Create is more efficient in both binary size and CUs than Assign + transfer + realloc.
 //! CPI is extremely compute intensive.

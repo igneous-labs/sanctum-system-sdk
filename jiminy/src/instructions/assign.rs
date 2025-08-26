@@ -13,6 +13,7 @@ pub const ASSIGN_IX_ACCOUNT_PERMS: AssignIxAccountPerms = AssignIxAccs(signer_wr
     ASSIGN_IX_IS_WRITABLE.0,
 ));
 
+#[inline]
 pub fn assign_ix_account_handle_perms(
     a: AssignIxAccounts,
 ) -> SystemAccountHandlePerms<'_, ASSIGN_IX_ACCS_LEN> {
