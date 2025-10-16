@@ -1,6 +1,15 @@
-use jiminy_cpi::{account::AccountHandle, AccountPerms};
-use sanctum_system_core::instructions::transfer::{
-    TransferIxAccs, TRANSFER_IX_ACCS_LEN, TRANSFER_IX_IS_SIGNER, TRANSFER_IX_IS_WRITABLE,
+use jiminy_cpi::{
+    account::{AccountHandle, Accounts},
+    pda::PdaSigner,
+    program_error::ProgramError,
+    AccountPerms, Cpi,
+};
+use sanctum_system_core::{
+    instructions::transfer::{
+        TransferIxAccs, TransferIxData, TRANSFER_IX_ACCS_LEN, TRANSFER_IX_IS_SIGNER,
+        TRANSFER_IX_IS_WRITABLE,
+    },
+    ID,
 };
 
 use super::{internal_utils::signer_writable_to_perms, SystemAccountHandlePerms};
@@ -14,7 +23,41 @@ pub const TRANSFER_IX_ACCOUNT_PERMS: TransferIxAccountPerms = TransferIxAccs(
 
 #[inline]
 pub fn transfer_ix_account_handle_perms(
-    a: TransferIxAccounts,
+    a: TransferIxAccounts<'_>,
 ) -> SystemAccountHandlePerms<'_, TRANSFER_IX_ACCS_LEN> {
     a.0.into_iter().zip(TRANSFER_IX_ACCOUNT_PERMS.0)
+}
+
+/// System program must be in context
+#[inline]
+pub fn transfer_invoke_fwd<'acc, const MAX_ACCOUNTS: usize, const MAX_CPI_ACCOUNTS: usize>(
+    accounts: &mut Accounts<'acc, MAX_ACCOUNTS>,
+    cpi: &mut Cpi<MAX_CPI_ACCOUNTS>,
+    handles: TransferIxAccounts<'acc>,
+    lamports: u64,
+) -> Result<(), ProgramError> {
+    cpi.invoke_fwd(
+        accounts,
+        &ID,
+        TransferIxData::new(lamports).as_buf(),
+        handles.0,
+    )
+}
+
+/// System program must be in context
+#[inline]
+pub fn transfer_invoke_signed<'acc, const MAX_ACCOUNTS: usize, const MAX_CPI_ACCOUNTS: usize>(
+    accounts: &mut Accounts<'acc, MAX_ACCOUNTS>,
+    cpi: &mut Cpi<MAX_CPI_ACCOUNTS>,
+    handles: TransferIxAccounts<'acc>,
+    lamports: u64,
+    signers: &[PdaSigner],
+) -> Result<(), ProgramError> {
+    cpi.invoke_signed(
+        accounts,
+        &ID,
+        TransferIxData::new(lamports).as_buf(),
+        transfer_ix_account_handle_perms(handles),
+        signers,
+    )
 }
