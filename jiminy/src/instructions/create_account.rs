@@ -1,5 +1,5 @@
 use jiminy_cpi::{
-    account::{AccountHandle, Accounts},
+    account::{Abr, AccountHandle},
     pda::PdaSigner,
     program_error::ProgramError,
     AccountPerms, Cpi,
@@ -32,35 +32,26 @@ pub fn create_account_ix_account_handle_perms(
 
 /// System program must be in context
 #[inline]
-pub fn create_account_invoke_fwd<'acc, const MAX_ACCOUNTS: usize, const MAX_CPI_ACCOUNTS: usize>(
-    accounts: &mut Accounts<'acc, MAX_ACCOUNTS>,
+pub fn create_account_invoke_fwd<'acc, const MAX_CPI_ACCOUNTS: usize>(
+    abr: &mut Abr,
     cpi: &mut Cpi<MAX_CPI_ACCOUNTS>,
     handles: CreateAccountIxAccounts<'acc>,
     args: &CreateAccountIxArgs<'_>,
 ) -> Result<(), ProgramError> {
-    cpi.invoke_fwd(
-        accounts,
-        &ID,
-        CreateAccountIxData::new(args).as_buf(),
-        handles.0,
-    )
+    cpi.invoke_fwd(abr, &ID, CreateAccountIxData::new(args).as_buf(), handles.0)
 }
 
 /// System program must be in context
 #[inline]
-pub fn create_account_invoke_signed<
-    'acc,
-    const MAX_ACCOUNTS: usize,
-    const MAX_CPI_ACCOUNTS: usize,
->(
-    accounts: &mut Accounts<'acc, MAX_ACCOUNTS>,
+pub fn create_account_invoke_signed<'acc, const MAX_CPI_ACCOUNTS: usize>(
+    abr: &mut Abr,
     cpi: &mut Cpi<MAX_CPI_ACCOUNTS>,
     handles: CreateAccountIxAccounts<'acc>,
     args: &CreateAccountIxArgs<'_>,
     signers: &[PdaSigner],
 ) -> Result<(), ProgramError> {
     cpi.invoke_signed(
-        accounts,
+        abr,
         &ID,
         CreateAccountIxData::new(args).as_buf(),
         create_account_ix_account_handle_perms(handles),

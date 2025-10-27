@@ -7,6 +7,7 @@
 
 #![allow(unexpected_cfgs)]
 
+use jiminy_cpi::account::{Abr, AccountHandle};
 use jiminy_entrypoint::program_error::{BuiltInProgramError, ProgramError};
 use jiminy_sysvar_rent::{sysvar::SimpleSysvar, Rent};
 use sanctum_system_jiminy::{
@@ -21,17 +22,17 @@ use sanctum_system_jiminy::{
 
 const MAX_ACCOUNTS: usize = 3;
 
-type Accounts<'a> = jiminy_entrypoint::account::Accounts<'a, MAX_ACCOUNTS>;
 type Cpi = jiminy_cpi::Cpi<3>;
 
 jiminy_entrypoint::entrypoint!(process_ix, MAX_ACCOUNTS);
 
 fn process_ix(
-    accounts: &mut Accounts,
+    abr: &mut Abr,
+    accounts: &[AccountHandle<'_>],
     data: &[u8],
     prog_id: &[u8; 32],
 ) -> Result<(), ProgramError> {
-    let [sys_prog, from, to] = accounts.as_slice() else {
+    let [sys_prog, from, to] = accounts else {
         return Err(ProgramError::from_builtin(
             BuiltInProgramError::NotEnoughAccountKeys,
         ));
@@ -46,17 +47,17 @@ fn process_ix(
     let lamports = Rent::get()?.min_balance(space);
 
     let mut cpi = Cpi::new();
-    let sys_prog_key = *accounts.get(sys_prog).key();
+    let sys_prog_key = *abr.get(sys_prog).key();
 
     cpi.invoke_signed(
-        accounts,
+        abr,
         &sys_prog_key,
         AssignIxData::new(prog_id).as_buf(),
         assign_ix_account_handle_perms(NewAssignIxAccsBuilder::start().with_assign(to).build()),
         &[],
     )?;
     cpi.invoke_signed(
-        accounts,
+        abr,
         &sys_prog_key,
         TransferIxData::new(lamports).as_buf(),
         transfer_ix_account_handle_perms(
@@ -68,5 +69,5 @@ fn process_ix(
         &[],
     )?;
 
-    accounts.get_mut(to).realloc(space, false)
+    abr.get_mut(to).realloc(space, false)
 }
