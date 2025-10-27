@@ -6,6 +6,7 @@
 
 #![allow(unexpected_cfgs)]
 
+use jiminy_cpi::account::{Abr, AccountHandle};
 use jiminy_entrypoint::program_error::{BuiltInProgramError, ProgramError};
 use jiminy_sysvar_rent::{sysvar::SimpleSysvar, Rent};
 use sanctum_system_jiminy::{
@@ -17,17 +18,17 @@ use sanctum_system_jiminy::{
 
 const MAX_ACCOUNTS: usize = 3;
 
-type Accounts<'a> = jiminy_entrypoint::account::Accounts<'a, MAX_ACCOUNTS>;
 type Cpi = jiminy_cpi::Cpi<3>;
 
 jiminy_entrypoint::entrypoint!(process_ix, MAX_ACCOUNTS);
 
 fn process_ix(
-    accounts: &mut Accounts,
+    abr: &mut Abr,
+    accounts: &[AccountHandle<'_>],
     data: &[u8],
     prog_id: &[u8; 32],
 ) -> Result<(), ProgramError> {
-    let [sys_prog, from, to] = accounts.as_slice() else {
+    let [sys_prog, from, to] = accounts else {
         return Err(ProgramError::from_builtin(
             BuiltInProgramError::NotEnoughAccountKeys,
         ));
@@ -40,10 +41,10 @@ fn process_ix(
     ) as usize;
 
     let lamports = Rent::get()?.min_balance(space);
-    let sys_prog_key = *accounts.get(sys_prog).key();
+    let sys_prog_key = *abr.get(sys_prog).key();
 
     Cpi::new().invoke_signed(
-        accounts,
+        abr,
         &sys_prog_key,
         CreateAccountIxData::new(&CreateAccountIxArgs {
             lamports,

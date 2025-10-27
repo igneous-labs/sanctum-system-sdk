@@ -1,5 +1,5 @@
 use jiminy_cpi::{
-    account::{AccountHandle, Accounts},
+    account::{Abr, AccountHandle},
     pda::PdaSigner,
     program_error::ProgramError,
     AccountPerms, Cpi,
@@ -30,31 +30,26 @@ pub fn transfer_ix_account_handle_perms(
 
 /// System program must be in context
 #[inline]
-pub fn transfer_invoke_fwd<'acc, const MAX_ACCOUNTS: usize, const MAX_CPI_ACCOUNTS: usize>(
-    accounts: &mut Accounts<'acc, MAX_ACCOUNTS>,
+pub fn transfer_invoke_fwd<'acc, const MAX_CPI_ACCOUNTS: usize>(
+    abr: &mut Abr,
     cpi: &mut Cpi<MAX_CPI_ACCOUNTS>,
     handles: TransferIxAccounts<'acc>,
     lamports: u64,
 ) -> Result<(), ProgramError> {
-    cpi.invoke_fwd(
-        accounts,
-        &ID,
-        TransferIxData::new(lamports).as_buf(),
-        handles.0,
-    )
+    cpi.invoke_fwd(abr, &ID, TransferIxData::new(lamports).as_buf(), handles.0)
 }
 
 /// System program must be in context
 #[inline]
-pub fn transfer_invoke_signed<'acc, const MAX_ACCOUNTS: usize, const MAX_CPI_ACCOUNTS: usize>(
-    accounts: &mut Accounts<'acc, MAX_ACCOUNTS>,
+pub fn transfer_invoke_signed<'acc, const MAX_CPI_ACCOUNTS: usize>(
+    abr: &mut Abr,
     cpi: &mut Cpi<MAX_CPI_ACCOUNTS>,
     handles: TransferIxAccounts<'acc>,
     lamports: u64,
     signers: &[PdaSigner],
 ) -> Result<(), ProgramError> {
     cpi.invoke_signed(
-        accounts,
+        abr,
         &ID,
         TransferIxData::new(lamports).as_buf(),
         transfer_ix_account_handle_perms(handles),
