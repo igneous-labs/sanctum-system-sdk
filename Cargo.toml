@@ -25,15 +25,16 @@ jiminy-entrypoint = { git = "https://github.com/igneous-labs/jiminy.git", branch
 jiminy-sysvar-rent = { git = "https://github.com/igneous-labs/jiminy.git", branch = "master" }
 
 # dev deps
-proptest = { version = "^1" }
+expect-test = "^1"
+proptest = "^1"
 
 # solana crates (for dev)
-mollusk-svm = "^0.5"
-solana-account = "^2"
-solana-instruction = "^2"
-solana-logger = "^2"
-solana-pubkey = "^2"
-solana-system-interface = "^1"
+mollusk-svm = "^0.9"
+solana-account = "^3"
+solana-instruction = "^3"
+solana-logger = "^3"
+solana-pubkey = "^3"
+solana-system-interface = "^3"
 
 # workspace members
 sanctum-system-core = { path = "core" }

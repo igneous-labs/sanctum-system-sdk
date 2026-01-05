@@ -9,6 +9,7 @@ solana-instruction = { workspace = true }
 solana-pubkey = { workspace = true }
 
 [target.'cfg(not(target_os = "solana"))'.dependencies]
+expect-test = { workspace = true }
 mollusk-svm = { workspace = true }
 proptest = { workspace = true }
 solana-logger = { workspace = true }
