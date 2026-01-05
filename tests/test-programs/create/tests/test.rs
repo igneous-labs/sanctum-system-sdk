@@ -15,7 +15,7 @@ use mollusk_svm::{
 use proptest::prelude::*;
 use sanctum_system_jiminy::sanctum_system_core::ID;
 use sanctum_system_test_utils::{
-    is_tx_balanced, save_binsize_to_file, save_cus_to_file, silence_mollusk_prog_logs, two_diff_pks,
+    bench_binsize, expect_test::expect, is_tx_balanced, silence_mollusk_prog_logs, two_diff_pks,
 };
 use solana_account::Account;
 use solana_instruction::{AccountMeta, Instruction};
@@ -32,7 +32,7 @@ const TO_ACC_IDX: usize = 2;
 
 #[test]
 fn save_binsize() {
-    save_binsize_to_file(PROG_NAME);
+    bench_binsize(PROG_NAME, expect!["6824"]);
 }
 
 #[test]
@@ -44,7 +44,7 @@ fn create_cus() {
     let accounts = ix_accounts(FROM, TO);
     let instr = ix(FROM, TO, SIZE);
 
-    SVM.with(|svm| {
+    let cus = SVM.with(|svm| {
         let InstructionResult {
             compute_units_consumed,
             raw_result,
@@ -60,8 +60,10 @@ fn create_cus() {
         assert_eq!(to.owner, PROG_ID);
         assert_eq!(to.data.len(), SIZE);
 
-        save_cus_to_file("basic", compute_units_consumed);
+        compute_units_consumed
     });
+
+    expect!["1386"].assert_eq(&cus.to_string());
 }
 
 proptest! {
