@@ -6,7 +6,7 @@ use super::internal_utils::impl_memset;
 
 // Accounts
 
-#[generic_array_struct(builder pub)]
+#[generic_array_struct(builder destr trymap pub)]
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub struct CreateAccountIxAccs<T> {
@@ -14,9 +14,7 @@ pub struct CreateAccountIxAccs<T> {
     pub new: T,
 }
 
-impl<T: Copy> CreateAccountIxAccs<T> {
-    impl_memset!(CREATE_ACCOUNT_IX_ACCS_LEN);
-}
+impl_memset!(CreateAccountIxAccs);
 
 pub type CreateAccountIxAccsFlag = CreateAccountIxAccs<bool>;
 

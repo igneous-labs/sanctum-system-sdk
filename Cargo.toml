@@ -17,7 +17,7 @@ version = "0.1.0"
 # In general, keep default-features = false in workspace
 # and enable individual features in indiv crates.
 # Dont really care as much for dev deps
-generic-array-struct = { version = "^0.3.1", default-features = false }
+generic-array-struct = { version = "^0.3.2", default-features = false }
 
 # jiminy crates
 jiminy-cpi = { git = "https://github.com/igneous-labs/jiminy.git", branch = "master" }
