@@ -4,16 +4,14 @@ use super::internal_utils::{caba, impl_memset};
 
 // Accounts
 
-#[generic_array_struct(builder pub)]
+#[generic_array_struct(builder destr trymap pub)]
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub struct AssignIxAccs<T> {
     pub assign: T,
 }
 
-impl<T> AssignIxAccs<T> {
-    impl_memset!(ASSIGN_IX_ACCS_LEN);
-}
+impl_memset!(AssignIxAccs);
 
 pub type AssignIxAccsFlag = AssignIxAccs<bool>;
 

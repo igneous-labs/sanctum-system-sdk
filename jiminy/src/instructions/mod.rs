@@ -7,6 +7,7 @@ use core::{array, iter::Zip};
 
 use jiminy_cpi::{account::AccountHandle, AccountPerms};
 
+pub mod allocate;
 pub mod assign;
 pub mod create_account;
 pub mod transfer;

@@ -12,7 +12,7 @@ type TransferIxKeys = TransferIxAccs<Pubkey>;
 
 proptest! {
     #[test]
-    fn check_assign_ix_against_sol(
+    fn check_transfer_ix_against_sol(
         from: [u8; 32],
         to: [u8; 32],
         lamports: u64,
